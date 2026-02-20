@@ -1,0 +1,105 @@
+global:
+  identity:
+    auth:
+      connectors:
+        existingSecret:
+          name: camunda-connectors-identity-secret
+      operate:
+        existingSecret:
+          name: camunda-operate-identity-secret
+      tasklist:
+        existingSecret:
+          name: camunda-tasklist-identity-secret
+      optimize:
+        existingSecret:
+          name: camunda-optimize-identity-secret
+      zeebe:
+        existingSecret:
+          name: camunda-zeebe-identity-secret
+      console:
+        redirectUrl: "https://local.distro.ultrawombat.com"
+      webModeler:
+        redirectUrl: "https://local.distro.ultrawombat.com/modeler"
+  postgresql:
+    auth:
+      password: "Demo"
+
+
+identity:
+  enabled: true
+  contextPath: "/identity"
+  fullURL: "https://local.distro.ultrawombat.com/identity"
+  # Keycloak client seed which is used to query Camunda APIs.
+  # clients:
+    # - id: test
+      # name: Test
+      # secret:
+        # inlineSecret: test_token
+      # redirectUris: /dummy
+      # rootUrl: http://dummy
+      # type: confidential
+      # permissions:
+        # - resourceServerId: camunda-identity-resource-server
+          # definition: read
+        # - resourceServerId: camunda-identity-resource-server
+          # definition: write
+        # - resourceServerId: orchestration-api
+          # definition: read:*
+        # - resourceServerId: orchestration-api
+          # definition: write:*
+        # - resourceServerId: optimize-api
+          # definition: write:*
+        # - resourceServerId: web-modeler-api
+          # definition: write:*
+        # - resourceServerId: console-api
+          # definition: write:*
+
+identityKeycloak:
+  auth:
+    existingSecret: camunda-keycloak
+  postgresql:
+    auth:
+      existingSecret: camunda-keycloak
+
+orchestration:
+  security:
+    initialization:
+      defaultRoles:
+        admin:
+          clients:
+            - test
+
+console:
+  enabled: true
+  contextPath: "/"
+  image:
+    pullSecrets:
+    - name: registry-camunda-cloud
+
+webModeler:
+  enabled: true
+  contextPath: "/modeler"
+  image:
+    pullSecrets:
+    - name: registry-camunda-cloud
+  restapi:
+    mail:
+      # This value is required, otherwise, the restapi pod won't start.
+      existingSecret:
+        name:  smtp-password
+      fromAddress: noreply@example.com
+
+postgresql:
+  enabled: true
+  
+prometheusServiceMonitor:
+  ## @param prometheusServiceMonitor.enabled if true then a service monitor will be deployed, which allows an installed prometheus controller to scrape metrics from the deployed pods
+  enabled: true
+  ## @extra promotheuServiceMonitor.labels can be set to configure extra labels, which will be added to the servicemonitor and can be used on the prometheus controller for selecting the servicemonitors
+  labels:
+    ## @param prometheusServiceMonitor.labels.release
+    release: metrics
+  ## @param prometheusServiceMonitor.scrapeInterval can be set to configure the interval at which metrics should be scraped
+  # Should be *less* than 60s if the provided grafana dashboard is used, which can be found here https://github.com/camunda/camunda/tree/main/monitor/grafana,
+  # otherwise it isn't able to show any metrics which is aggregated over 1 min.
+  scrapeInterval: 10s

@@ -1,0 +1,11 @@
+# Add your own Camunda 8 Helm chart values here if needed.
+# https://artifacthub.io/packages/helm/camunda/camunda-platform#parameters
+
+# Starting from Camunda 8.6, Web Modeler uses public images and doesn't need secret to pull images.
+webModeler:
+  image:
+    pullSecrets: []
+
+zeebeGateway:
+  # Enable Zeebe REST API endpoint.
+  contextPath: "/zeebe"

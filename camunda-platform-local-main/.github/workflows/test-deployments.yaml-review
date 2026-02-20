@@ -1,0 +1,139 @@
+name: Test Camunda Deployments
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  test-deployments:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install tools via asdf
+        uses: asdf-vm/actions/install@v3
+
+      - name: Create Kind cluster
+        uses: helm/kind-action@v1
+        with:
+          config: clusters/kind/kind-cluster-config.yaml
+          cluster_name: camunda-platform-local
+
+      - name: Wait for cluster to be ready
+        run: kubectl wait --for=condition=Ready nodes --all --timeout=300s
+
+      - name: Initialize infrastructure (Nginx Ingress)
+        run: make infra.init
+
+      - name: Wait for ingress controller
+        run: |
+          echo "Waiting for ingress controller..."
+          timeout=300
+          elapsed=0
+          while [ $elapsed -lt $timeout ]; do
+            kubectl get pods -n ingress-nginx
+            if kubectl wait --namespace ingress-nginx \
+              --for=condition=ready pod \
+              --selector=app.kubernetes.io/component=controller \
+              --timeout=1s &>/dev/null; then
+              echo "Ingress controller ready!"
+              break
+            fi
+            sleep 10
+            elapsed=$((elapsed + 10))
+            echo "--- Elapsed: ${elapsed}s ---"
+          done
+          echo "Final status:"
+          kubectl get pods -n ingress-nginx
+
+      - name: Setup Camunda namespace and secrets
+        run: make camunda.init
+
+      - name: Install latest snapshot
+        run: make camunda.setup.latestSnapshot
+        env:
+          HELM_COMMAND_ACTION: install
+
+      - name: Wait for Camunda deployment (latest snapshot)
+        run: |
+          echo "Waiting for pods to be ready..."
+          timeout=900
+          elapsed=0
+          while [ $elapsed -lt $timeout ]; do
+            kubectl get pods -n camunda-platform
+            if kubectl wait --namespace camunda-platform \
+              --for=condition=ready pod \
+              --selector=app.kubernetes.io/name=camunda-platform \
+              --timeout=1s &>/dev/null; then
+              echo "All pods are ready!"
+              break
+            fi
+            sleep 10
+            elapsed=$((elapsed + 10))
+            echo "--- Elapsed: ${elapsed}s ---"
+          done
+          echo "Final status:"
+          kubectl get pods -n camunda-platform
+
+      - name: Check deployment status (latest snapshot)
+        run: |
+          helm list -n camunda-platform
+          kubectl get all -n camunda-platform
+
+      - name: Clean Camunda deployment
+        run: make camunda.clean
+
+      - name: Wait for namespace deletion
+        run: |
+          kubectl wait --for=delete namespace/camunda-platform --timeout=300s || true
+
+      - name: Recreate Camunda namespace
+        run: make camunda.init
+         
+      - name: Install alpha snapshot
+        run: make camunda.setup.alphaSnapshot
+        env:
+          HELM_COMMAND_ACTION: install
+
+      - name: Wait for Camunda deployment (alpha snapshot)
+        run: |
+          echo "Waiting for pods to be ready..."
+          timeout=900
+          elapsed=0
+          while [ $elapsed -lt $timeout ]; do
+            kubectl get pods -n camunda-platform
+            if kubectl wait --namespace camunda-platform \
+              --for=condition=ready pod \
+              --selector=app.kubernetes.io/name=camunda-platform \
+              --timeout=1s &>/dev/null; then
+              echo "All pods are ready!"
+              break
+            fi
+            sleep 10
+            elapsed=$((elapsed + 10))
+            echo "--- Elapsed: ${elapsed}s ---"
+          done
+          echo "Final status:"
+          kubectl get pods -n camunda-platform
+
+      - name: Check deployment status (alpha snapshot)
+        run: |
+          helm list -n camunda-platform
+          kubectl get all -n camunda-platform
+
+      - name: Debug - Show Helm release status on failure
+        if: failure()
+        run: |
+          helm status camunda -n camunda-platform || true
+          kubectl get events -n camunda-platform --sort-by='.lastTimestamp' || true
+          kubectl describe pods -n camunda-platform || true
+
+      - name: Cleanup
+        if: always()
+        run: make cluster.clean
