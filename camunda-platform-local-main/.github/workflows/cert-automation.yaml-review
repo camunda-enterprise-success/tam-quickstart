@@ -1,0 +1,63 @@
+on:
+  schedule:
+      - cron: "0 0 1 * *"  # At midnight on the 1st of every month
+  workflow_dispatch:
+permissions:
+  contents: write
+  pull-requests: write
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+      deployments: write
+    steps:
+      - name: Generate GitHub token
+        uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a # v2
+        id: generate-github-token
+        with:
+          app_id: ${{ secrets.GH_APP_ID_DISTRO_CI }}
+          private_key: ${{ secrets.GH_APP_PRIVATE_KEY_DISTRO_CI }}
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+        with:
+          repository: camunda/camunda-platform-helm
+      - name: Authenticate to GKE
+        uses: ./.github/actions/gke-login
+        with:
+          cluster-name: ${{ secrets.DISTRO_CI_GCP_GKE_CLUSTER_NAME }}
+          cluster-location: ${{ secrets.DISTRO_CI_GCP_GKE_CLUSTER_LOCATION }}
+          workload-identity-provider: ${{ secrets.DISTRO_CI_GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service-account: ${{ secrets.DISTRO_CI_GCP_SERVICE_ACCOUNT }}
+      - name: Get tls.key and tls.crt from Kubernetes secrets
+        id: get-secrets
+        run: |
+          TLS_KEY=$(kubectl -n distribution-team get secret local-distro-ultrawombat-com -o jsonpath="{.data.tls\.key}")
+          TLS_CRT=$(kubectl -n distribution-team get secret local-distro-ultrawombat-com -o jsonpath="{.data.tls\.crt}")
+          echo "TLS_KEY=$TLS_KEY" >> $GITHUB_ENV
+          echo "TLS_CRT=$TLS_CRT" >> $GITHUB_ENV
+      - name: Verify environment variables
+        run: |
+          echo "TLS_KEY: $TLS_KEY"
+          echo "TLS_CRT: $TLS_CRT"
+      - name: Checkout
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+        with:
+          repository: camunda/camunda-platform-local
+          ref: main
+      - name: Modify secret file with new tls.key and tls.crt
+        run: |
+          sed -i "s|tls.crt:.*|tls.crt: $TLS_CRT|g" modules/camunda-platform/secret.yaml
+          sed -i "s|tls.key:.*|tls.key: $TLS_KEY|g" modules/camunda-platform/secret.yaml
+      - name: Git pull
+        run: git pull --rebase --autostash .
+      - uses: EndBug/add-and-commit@a94899bca583c204427a224a7af87c02f9b325d5 # v9.1.4
+        env:
+          GH_TOKEN: "${{ steps.generate-github-token.outputs.token }}"
+        with:
+          author_name: "distro-ci[bot]"
+          author_email: "122795778+distro-ci[bot]@users.noreply.github.com"
+          message: "chore: update secret"
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+        with:
+          repository: camunda/camunda-platform-helm
