@@ -17,14 +17,14 @@ global:
         existingSecret:
           name: camunda-zeebe-identity-secret
       console:
-        redirectUrl: "https://local.distro.ultrawombat.com"
+        redirectUrl: "https://camunda.es.local"
       webModeler:
-        redirectUrl: "https://local.distro.ultrawombat.com/modeler"
+        redirectUrl: "https://camunda.es.local/modeler"
 
 identity:
   enabled: true
   contextPath: "/identity"
-  fullURL: "https://local.distro.ultrawombat.com/identity"
+  fullURL: "https://camunda.es.local/identity"
   # Keycloak client seed which is used to query Camunda APIs.
   # clients:
     # - id: test

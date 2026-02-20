@@ -17,7 +17,7 @@ for DNS and certificate configuration (the expected way our clients use the Camu
 
 # How does it work?
 
-The domain `local.distro.ultrawombat.com` and all its sub-domains point to `127.0.0.1`,
+The domain `camunda.es.local` and all its sub-domains point to `127.0.0.1`,
 and it will work with the Kubernetes local cluster that exposes ports `80` and `443` locally (configured via `KinD`).
 
 ---
@@ -112,15 +112,15 @@ make cluster.clean
 
 # Access
 
-- Console: https://local.distro.ultrawombat.com
-- Keycloak: https://local.distro.ultrawombat.com/auth
-- Identity: https://local.distro.ultrawombat.com/identity
-- Web Modeler: https://local.distro.ultrawombat.com/modeler
-- Operate: https://local.distro.ultrawombat.com/operate
-- Tasklist: https://local.distro.ultrawombat.com/tasklist
-- Optimize: https://local.distro.ultrawombat.com/optimize
-- Zeebe (REST): https://local.distro.ultrawombat.com/zeebe
-- Zeebe (gRPC): zeebe.local.distro.ultrawombat.com:443
+- Console: https://camunda.es.local
+- Keycloak: https://camunda.es.local/auth
+- Identity: https://camunda.es.local/identity
+- Web Modeler: https://camunda.es.local/modeler
+- Operate: https://camunda.es.local/operate
+- Tasklist: https://camunda.es.local/tasklist
+- Optimize: https://camunda.es.local/optimize
+- Zeebe (REST): https://camunda.es.local/zeebe
+- Zeebe (gRPC): zeebe.camunda.es.local:443
 
 ## Deploy or execute a process from the Web Modeler
 
@@ -133,8 +133,8 @@ This means that in the deployment dialog, you have to enter the internal Kuberne
 
 Communication between Desktop Modeler, Zeebe, and Keycloak happens outside the Kubernetes cluster.
 This means that in the deployment dialog, you have to enter the external URL for Zeebe and Keycloak:
-* Cluster endpoint: `https://zeebe.local.distro.ultrawombat.com:443`
-* OAuth URL: `https://local.distro.ultrawombat.com/auth/realms/camunda-platform/protocol/openid-connect/token`
+* Cluster endpoint: `https://zeebe.camunda.es.local:443`
+* OAuth URL: `https://camunda.es.local/auth/realms/camunda-platform/protocol/openid-connect/token`
 
 # Configuring Service Startup
 
@@ -149,11 +149,11 @@ To launch only the modeling dependencies, such as the Web Modeler and Identity f
 
 ## Fritz Box
 
-The URls are working as the DNS entry for them resolves to `127.0.0.1`. If the FritzBox serves as DNS server, it will [refuse to resolve an entry to a private IP address](https://en.avm.de/service/knowledge-base/dok/FRITZ-Box-7360-int/663_No-DNS-resolution-of-private-IP-addresses/). This behavior can be changed by adding exceptions for `local.distro.ultrawombat.com`. Another option would be the selection of an alternative DNS server `1.1.1.1` for your device or [the FritzBox](https://avm.de/service/wissensdatenbank/dok/FRITZ-Box-7530/165_Andere-DNS-Server-in-FRITZ-Box-einrichten).
+The URls are working as the DNS entry for them resolves to `127.0.0.1`. If the FritzBox serves as DNS server, it will [refuse to resolve an entry to a private IP address](https://en.avm.de/service/knowledge-base/dok/FRITZ-Box-7360-int/663_No-DNS-resolution-of-private-IP-addresses/). This behavior can be changed by adding exceptions for `camunda.es.local`. Another option would be the selection of an alternative DNS server `1.1.1.1` for your device or [the FritzBox](https://avm.de/service/wissensdatenbank/dok/FRITZ-Box-7530/165_Andere-DNS-Server-in-FRITZ-Box-einrichten).
 
 If none of this can be applied to your setup, you can modify your [hosts file](https://www.howtogeek.com/27350/beginner-geek-how-to-edit-your-hosts-file/) and add the following lines:
-* `127.0.0.1 local.distro.ultrawombat.com`
-* `127.0.0.1 zeebe.local.distro.ultrawombat.com`
+* `127.0.0.1 camunda.es.local`
+* `127.0.0.1 zeebe.camunda.es.local`
 
 ## Mac
 - Make sure you delegate enough CPU and memory to Docker. You can do this through the Docker UI.

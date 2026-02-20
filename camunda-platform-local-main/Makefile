@@ -44,7 +44,16 @@ help: help-banner
 	echo ""; \
 	}
 	
+generate-ca-cert:
+	mkcert -install
+	mkcert -cert-file ./modules/cert/tls.crt -key-file ./modules/cert/tls.key *.camunda.es.local 
 
+generate-secret-yaml: generate-ca-cert
+	kubectl create secret tls camunda-tls \
+		--cert=./modules/cert/tls.crt \
+		--key=./modules/cert/tls.key \
+		-n camunda-platform \
+		--dry-run=client -o yaml > ./modules/camunda-platform/secret.yaml
 
 camunda.custom.install.infra:
 ifndef VERSION
@@ -52,6 +61,8 @@ ifndef VERSION
 else
 	@echo "Installing version: $(VERSION)"
 endif
+	@echo "Generating certs..."
+	@$(MAKE) generate-secret-yaml 
 	@echo "Create Cluster..."
 	kind create cluster --name camunda-platform-local --config "C:\Users\AaronHubbart\Documents\Camunda-Software\kind\8.9\camunda-platform-local-main\clusters\kind\kind-cluster-config.yaml" 
 	@echo "Adjust for Local setup..."

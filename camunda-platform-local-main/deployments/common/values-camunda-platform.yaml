@@ -9,17 +9,17 @@ global:
     auth:
       enabled: true
       type: "KEYCLOAK"
-      publicIssuerUrl: "https://local.distro.ultrawombat.com/auth/realms/camunda-platform"
-      issuer: "https://local.distro.ultrawombat.com/auth/realms/camunda-platform"
+      publicIssuerUrl: "https://camunda.es.local/auth/realms/camunda-platform"
+      issuer: "https://camunda.es.local/auth/realms/camunda-platform"
       optimize:
-        redirectUrl: "https://local.distro.ultrawombat.com/optimize"
+        redirectUrl: "https://camunda.es.local/optimize"
         secret:
           existingSecret: camunda-credentials
           existingSecretKey: identity-optimize-client-token
   ingress:
     enabled: true
     className: ""
-    host: "local.distro.ultrawombat.com"
+    host: "camunda.es.local"
     tls:
       enabled: true
       secretName: camunda-platform
@@ -50,7 +50,7 @@ identity:
       io.camunda.identity: DEBUG
   enabled: true
   contextPath: "/identity"
-  fullURL: "https://local.distro.ultrawombat.com/identity"
+  fullURL: "https://camunda.es.local/identity"
   firstUser:
     secret:
       existingSecret: camunda-credentials
@@ -75,7 +75,7 @@ orchestration:
     grpc:
       enabled: true
       className: ""
-      host: "zeebe.local.distro.ultrawombat.com"
+      host: "zeebe.camunda.es.local"
       tls:
         enabled: true
         secretName: camunda-platform
@@ -85,5 +85,5 @@ orchestration:
         secret:
           existingSecret: camunda-credentials
           existingSecretKey: identity-orchestration-client-token
-        redirectUrl: https://local.distro.ultrawombat.com/orchestration
+        redirectUrl: https://camunda.es.local/orchestration
 
