@@ -1,5 +1,7 @@
+PYTHON ?= python3
+MAKEFLAGS += --no-print-directory
 CLUSTER_CONFIG := clusters/kind/kind-cluster-config.yaml
-CLUSTER_NAME := $(shell awk '/^name: /{print $$2}' $(CLUSTER_CONFIG))
+CLUSTER_NAME ?= $(shell awk '/^name: /{print $$2}' $(CLUSTER_CONFIG))
 HELM_COMMAND_ACTION ?= install
 CAMUNDA_CHART_VERSION_LATEST ?= 0.0.0-snapshot-latest
 CAMUNDA_CHART_VERSION_ALPHA ?= 0.0.0-snapshot-alpha
@@ -27,6 +29,9 @@ help: help-banner
 	echo "------------------"; \
 	echo "camunda.custom.install - Used to install kind cluster, Camunda 8.x, and monitoring stack. "; \
 	echo "     Optional Parameter - VERSION - Specify helm chart version (e.g. VERSION=12.7.6)"; \
+	echo "                          Default value: Latest Stable Version"; \
+	echo "     Optional Parameter - CLUSTER_NAME - Specify cluster name prefix (e.g. CLUSTER_NAME=camunda-8-8)"; \
+	echo "                          Default value: camunda-platform-local"; \
 	echo "     https://helm.camunda.io/camunda-platform/version-matrix/"; \
 	echo ""; \
 	echo "upgrade-custom - used to Upgrade Camunda. "; \
@@ -44,6 +49,18 @@ help: help-banner
 	echo ""; \
 	}
 	
+	
+hosts-add:
+	$(PYTHON) modules/cert/hosts_update.py --ip "127.0.0.1" --host "camunda.es.local"
+
+hosts-remove:
+	$(PYTHON) modules/cert/hosts_update.py --ip "$(HOST_IP)" --host "camunda.es.local" --remove
+	
+	
+check-vars:
+	@echo "VERSION: $(VERSION)"
+	@echo "NAME: $(CLUSTER_NAME)"
+
 generate-ca-cert:
 	mkcert -install
 	mkcert -cert-file ./modules/cert/tls.crt -key-file ./modules/cert/tls.key *.camunda.es.local 
@@ -64,9 +81,9 @@ endif
 	@echo "Generating certs..."
 	@$(MAKE) generate-secret-yaml 
 	@echo "Create Cluster..."
-	kind create cluster --name camunda-platform-local --config "C:\Users\AaronHubbart\Documents\Camunda-Software\kind\8.9\camunda-platform-local-main\clusters\kind\kind-cluster-config.yaml" 
+	kind create cluster --name $(CLUSTER_NAME) --config .\clusters\kind\kind-cluster-config.yaml
 	@echo "Adjust for Local setup..."
-	kubectl cluster-info --context kind-camunda-platform-local
+	kubectl cluster-info --context kind-$(CLUSTER_NAME)
 	kubectl kustomize --enable-helm clusters/kind | kubectl apply -f -
 	kubectl delete pod -n kube-system -l k8s-app=kube-dns
 	@echo "Install Monitoring..."
@@ -88,7 +105,7 @@ grafana-creds:
 	@echo "Password: $$(kubectl get secret grafana-admin-password -n camunda-platform -o jsonpath='{.data.admin-password}' | base64 -d)"
 
 clean-custom:
-	kind delete cluster --name camunda-platform-local
+	kind delete cluster --name $(CLUSTER_NAME)
 	
 upgrade-custom:
 ifndef VERSION

@@ -34,7 +34,8 @@ The following tools are required:
 - [KinD](https://kind.sigs.k8s.io/docs/user/quick-start/#installation)
 - [Kubectl](https://kubernetes.io/docs/tasks/tools/#kubectl)
 - [Helm](https://helm.sh/docs/intro/install/)
-- [mkcert](https://github.com/FiloSottile/mkcert)
+- [mkcert](https://github.com/FiloSottile/mkcert) - Needed only for custom domain
+- [Python](https://python.org/downloads) - Needed only for custom domain
 
 # How to use
 
