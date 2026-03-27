@@ -1,0 +1,42 @@
+export VALUES_ORCHESTRATION_NODE_ID=0
+Picked up JAVA_TOOL_OPTIONS: -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/usr/local/camunda/data -XX:ErrorFile=/usr/local/camunda/data/camunda_error%p.log -XX:+ExitOnOutOfMemoryError
+Standard Commons Logging discovery in action with spring-jcl: please remove commons-logging.jar from classpath in order to avoid potential conflicts
+   ___   _   __  __ _   _ _  _ ___   _
+  / __| /_\ |  \/  | | | | \| |   \ /_\
+ | (__ / _ \| |\/| | |_| | .` | |) / _ \
+  \___/_/ \_\_|  |_|\___/|_|\_|___/_/ \_\
+[2026-03-19 20:10:04.522] [main] INFO 
+	io.camunda.application.StandaloneCamunda - Starting StandaloneCamunda v8.8.16 using Java 21.0.10 with PID 1 (/usr/local/camunda/lib/camunda-zeebe-8.8.16.jar started by camunda in /usr/local/camunda)
+[2026-03-19 20:10:04.524] [main] INFO 
+	io.camunda.application.StandaloneCamunda - The following 5 profiles are active: "broker", "identity", "operate", "tasklist", "consolidated-auth"
+[2026-03-19 20:10:07.489] [main] INFO 
+	org.springframework.boot.web.embedded.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+[2026-03-19 20:10:07.776] [main] INFO 
+	org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 3095 ms
+Standard Commons Logging discovery in action with spring-jcl: please remove commons-logging.jar from classpath in order to avoid potential conflicts
+[2026-03-19 20:10:07.918] [main] WARN 
+	io.camunda.configuration.UnifiedConfigurationHelper - The following legacy properties are no longer supported and should be removed in favor of 'camunda.data.secondary-storage.type': camunda.tasklist.database, camunda.operate.database, zeebe.broker.exporters.camundaexporter.args.connect.type, camunda.database.type
+[2026-03-19 20:10:07.918] [main] WARN 
+	io.camunda.configuration.UnifiedConfigurationHelper - The following legacy properties are no longer supported and should be removed in favor of 'camunda.data.secondary-storage.elasticsearch.url': camunda.database.url, zeebe.broker.exporters.camundaexporter.args.connect.url, camunda.operate.elasticsearch.url, camunda.tasklist.elasticsearch.url
+[2026-03-19 20:10:07.922] [main] INFO 
+	io.camunda.operate.connect.OperateDateTimeFormatter - rfc3339ApiDateFormat is set to false, operate API will format datetimes in the existing format
+[2026-03-19 20:10:07.968] [main] WARN 
+	io.camunda.configuration.UnifiedConfigurationHelper - The following legacy properties are no longer supported and should be removed in favor of 'camunda.data.secondary-storage.type': camunda.tasklist.database, camunda.operate.database, zeebe.broker.exporters.camundaexporter.args.connect.type, camunda.database.type
+[2026-03-19 20:10:07.968] [main] WARN 
+	io.camunda.configuration.UnifiedConfigurationHelper - The following legacy properties are no longer supported and should be removed in favor of 'camunda.data.secondary-storage.elasticsearch.url': camunda.database.url, zeebe.broker.exporters.camundaexporter.args.connect.url, camunda.operate.elasticsearch.url, camunda.tasklist.elasticsearch.url
+[2026-03-19 20:10:08.287] [main] WARN 
+	io.camunda.configuration.UnifiedConfigurationHelper - The following legacy configuration properties should be removed in favor of 'camunda.cluster.network.host': zeebe.broker.network.host
+[2026-03-19 20:10:08.291] [main] WARN 
+	io.camunda.configuration.UnifiedConfigurationHelper - The following legacy properties are no longer supported and should be removed in favor of 'camunda.data.secondary-storage.type': camunda.tasklist.database, camunda.operate.database, zeebe.broker.exporters.camundaexporter.args.connect.type, camunda.database.type
+[2026-03-19 20:10:08.292] [main] WARN 
+	io.camunda.configuration.UnifiedConfigurationHelper - The following legacy properties are no longer supported and should be removed in favor of 'camunda.data.secondary-storage.type': camunda.tasklist.database, camunda.operate.database, zeebe.broker.exporters.camundaexporter.args.connect.type, camunda.database.type
+[2026-03-19 20:10:08.292] [main] WARN 
+	io.camunda.configuration.UnifiedConfigurationHelper - The following legacy properties are no longer supported and should be removed in favor of 'camunda.data.secondary-storage.elasticsearch.url': camunda.database.url, zeebe.broker.exporters.camundaexporter.args.connect.url, camunda.operate.elasticsearch.url, camunda.tasklist.elasticsearch.url
+[2026-03-19 20:10:08.855] [main] WARN 
+	io.camunda.configuration.UnifiedConfigurationHelper - The following legacy properties are no longer supported and should be removed in favor of 'camunda.data.secondary-storage.type': camunda.tasklist.database, camunda.operate.database, zeebe.broker.exporters.camundaexporter.args.connect.type, camunda.database.type
+[2026-03-19 20:10:08.855] [main] WARN 
+	io.camunda.configuration.UnifiedConfigurationHelper - The following legacy properties are no longer supported and should be removed in favor of 'camunda.data.secondary-storage.type': camunda.tasklist.database, camunda.operate.database, zeebe.broker.exporters.camundaexporter.args.connect.type, camunda.database.type
+[2026-03-19 20:10:08.856] [main] WARN 
+	io.camunda.configuration.UnifiedConfigurationHelper - The following legacy properties are no longer supported and should be removed in favor of 'camunda.data.secondary-storage.elasticsearch.url': camunda.database.url, zeebe.broker.exporters.camundaexporter.args.connect.url, camunda.operate.elasticsearch.url, camunda.tasklist.elasticsearch.url
+[2026-03-19 20:10:08.863] [netty-messaging-event-epoll-server-0] [{actor-scheduler=Broker-0}] INFO 
+	io.atomix.cluster.messaging.impl.NettyMessagingService - Started messaging service bound to [0.0.0.0:26502], advertising camunda-zeebe-0.camunda-zeebe:26502, and using plaintext

@@ -5,6 +5,9 @@ CLUSTER_NAME ?= $(shell awk '/^name: /{print $$2}' $(CLUSTER_CONFIG))
 HELM_COMMAND_ACTION ?= install
 CAMUNDA_CHART_VERSION_LATEST ?= 0.0.0-snapshot-latest
 CAMUNDA_CHART_VERSION_ALPHA ?= 0.0.0-snapshot-alpha
+CAMUNDA_NAMESPACE ?= camunda-platform
+DEFAULT_PASSWORD ?= Demo
+KIND_CLUSTER_NAME ?= $(CLUSTER_NAME)
 
 help-banner:
 	@{ \
@@ -72,6 +75,15 @@ generate-secret-yaml: generate-ca-cert
 		-n camunda-platform \
 		--dry-run=client -o yaml > ./modules/camunda-platform/secret.yaml
 
+delete-kind-if-exists:
+	@if kind get clusters 2>/dev/null | grep -qx "$(KIND_CLUSTER_NAME)"; then \
+		echo "Cluster '$(KIND_CLUSTER_NAME)' found. Deleting..."; \
+		kind delete cluster --name "$(KIND_CLUSTER_NAME)"; \
+	else \
+		echo "Cluster '$(KIND_CLUSTER_NAME)' not found."; \
+	fi
+
+
 camunda.custom.install.infra:
 ifndef VERSION
 	@echo "Latest Stable Version"
@@ -81,10 +93,26 @@ endif
 	@echo "Generating certs..."
 	@$(MAKE) generate-secret-yaml 
 	@echo "Create Cluster..."
+	@$(MAKE) delete-kind-if-exists
 	kind create cluster --name $(CLUSTER_NAME) --config .\clusters\kind\kind-cluster-config.yaml
 	@echo "Adjust for Local setup..."
 	kubectl cluster-info --context kind-$(CLUSTER_NAME)
 	kubectl kustomize --enable-helm clusters/kind | kubectl apply -f -
+	kubectl delete secret camunda-credentials --namespace $(CAMUNDA_NAMESPACE)
+	kubectl create secret generic camunda-credentials \
+	  --from-literal=identity-keycloak-admin-password=$(DEFAULT_PASSWORD) \
+	  --from-literal=identity-keycloak-user-password=$(DEFAULT_PASSWORD) \
+	  --from-literal=identity-first-user-password=$(DEFAULT_PASSWORD) \
+	  --from-literal=identity-connectors-client-token=$(DEFAULT_PASSWORD) \
+	  --from-literal=identity-optimize-client-token=$(DEFAULT_PASSWORD) \
+	  --from-literal=identity-orchestration-client-token=$(DEFAULT_PASSWORD) \
+	  --from-literal=identity-console-client-token=$(DEFAULT_PASSWORD) \
+	  --from-literal=identity-postgresql-admin-password=$(DEFAULT_PASSWORD) \
+	  --from-literal=identity-postgresql-user-password=$(DEFAULT_PASSWORD) \
+	  --from-literal=web-modeler-postgresql-admin-password=$(DEFAULT_PASSWORD) \
+	  --from-literal=web-modeler-postgresql-user-password=$(DEFAULT_PASSWORD) \
+	  --from-literal=orchestration-rdbms-password=$(DEFAULT_PASSWORD) \
+	  --namespace $(CAMUNDA_NAMESPACE)
 	kubectl delete pod -n kube-system -l k8s-app=kube-dns
 	@echo "Install Monitoring..."
 	helm install prometheus prometheus-community/kube-prometheus-stack --create-namespace -n camunda-platform -f ./prometheus-operator-values.yml --set prometheusOperator.tlsProxy.enabled=false
@@ -113,7 +141,7 @@ ifndef VERSION
 	helm upgrade camunda camunda/camunda-platform \
 		--create-namespace --namespace camunda-platform \
 		--values deployments/common/values-camunda-platform.yaml \
-		--values deployments/common/values-camunda-platform-custom.yaml \
+		--values deployments/common/values-camunda-platform-custom_8.9.yaml \
 		--values deployments/camunda-platform-latest/values-camunda-platform-extra.yaml
 else
 	@echo "Upgrade to Version $(VERSION)..."
@@ -139,6 +167,13 @@ open-ports:
 	@echo ""
 	@$(MAKE) get-url
 	
+open-zeebe-ports:
+	@echo "Starting port forwards..."
+	@nohup kubectl port-forward svc/camunda-zeebe-gateway 8088:8080 -n camunda-platform > /tmp/zeebe-pf.log 2>&1 &
+	@echo "zeebe listening on port 8088"
+	@echo "Port forwards started."
+	@echo ""
+	@$(MAKE) get-url
 	
 .asdf.plugins-add:
 	#
@@ -180,7 +215,7 @@ camunda.setup.latestStable: camunda.helmRepo camunda.init
 	helm $(HELM_COMMAND_ACTION) camunda camunda/camunda-platform \
 		--create-namespace --namespace camunda-platform \
 		--values deployments/common/values-camunda-platform.yaml \
-		--values deployments/common/values-camunda-platform-custom.yaml \
+		--values deployments/common/values-camunda-platform-custom_8.9.yaml \
 		--values deployments/camunda-platform-latest/values-camunda-platform-extra.yaml
 
 camunda.setup.latestSnapshot: camunda.init

@@ -6,4 +6,5 @@ namespace: camunda-platform
 resources:
 - ./namespace.yaml
 - ./secret.yaml
+- ./secret2.yaml
 - ./customSecrets.yaml

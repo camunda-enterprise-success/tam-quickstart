@@ -50,12 +50,12 @@ identity:
         # - resourceServerId: console-api
           # definition: write:*
 
-identityKeycloak:
+identityPostgresql:
+  enabled: true
   auth:
-    existingSecret: camunda-keycloak
-  postgresql:
-    auth:
-      existingSecret: camunda-keycloak
+    username: camunda
+    database: camunda
+    password: demo
 
 orchestration:
   security:
